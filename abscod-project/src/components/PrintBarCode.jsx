@@ -4,6 +4,9 @@ const PrintBarCode = () => {
   const [barShow, setBarShow] = useState(false);
   const [data, setData] = useState([]);
   const [cart, setCart] = useState([]);
+  const [search, setSearch] = useState("");
+  const [searchCart, setSearchCart] = useState();
+
   const updateHandler = () => {
     setBarShow(true);
   };
@@ -22,10 +25,25 @@ const PrintBarCode = () => {
   }, []);
 
   const clickHandler = (e) => {
-    let a = data.filter((item) => item._id === e.target.value);
-    setCart([...cart,...a]);
+    const dummyData = data.filter((item) => item._id === e.target.value);
+    setCart([...cart, ...dummyData]);
   };
-  console.log('cart',cart)
+
+  const deleteHandle = (id) => {
+    const dummyData = cart.filter((item) => item._id !== id);
+    setCart([...dummyData]);
+  };
+  const searchHandle = (e) => {
+    setSearch(e.target.value);
+
+    const dummyData = data.filter((item) => item.product_name.includes(search));
+    setSearchCart([...dummyData]);
+  };
+
+  const addHandler = (id) => {
+    const dummyData = searchCart.filter((item) => item._id === id);
+    setCart([...cart, ...dummyData]);
+  };
   return (
     <div className="h-screen ">
       <div className="border-2   text-blue-900 text-lg font-bold flex justify-between">
@@ -35,13 +53,39 @@ const PrintBarCode = () => {
         </div>
       </div>
       <div className="border-2 h-2/3 m-8 bg-gray-100">
-        <div className=" border-2 my-8 mx-12 ">
+        <div className=" border-2 my-8 mx-12 relative">
           <input
             type="text"
+            value={search}
+            onChange={(e) => searchHandle(e)}
             placeholder="Search Products"
             className="w-full p-3 "
           />
+          {searchCart &&
+            searchCart.map((item) => {
+              return (
+                <div
+                  style={{
+                    zIndex:"2",
+                    Height:"200px",
+                    top: "50px",
+                    position: "absolute",
+                    background: "white",
+                    width: "100%",
+                    border: "1px solid light-gray",
+                    overflow: "auto",
+                    padding:'5px',
+                    Height:'40px',
+                    overflowY:'scroll'
 
+                  }}
+                >
+                  <p onClick={() => addHandler(item._id)}>
+                    {item.product_name}
+                  </p>
+                </div>
+              );
+            })}
           <select
             name=""
             id=""
@@ -76,9 +120,12 @@ const PrintBarCode = () => {
                 </tr>
               </thead>
               <tbody>
-                {cart?.map((item,id) => {
+                {cart?.map((item, id) => {
                   return (
-                    <tr key={id} className="h-12 border-gray-300  border-t border-b hover:border-indigo-300 hover:shadow-md cursor-pointer transition duration-150 ease-in-out">
+                    <tr
+                      key={id}
+                      className="h-12 border-gray-300  border-t border-b hover:border-indigo-300 hover:shadow-md cursor-pointer transition duration-150 ease-in-out"
+                    >
                       <td className="pl-8 pr-6 text-left whitespace-no-wrap text-sm text-gray-800 dark:text-gray-100 tracking-normal leading-4">
                         {item.product_name}
                       </td>
@@ -94,7 +141,10 @@ const PrintBarCode = () => {
                       </td>
 
                       <td>
-                        <div className="p-2 pr-1 bg-gray-100 hover:bg-gray-200 rounded cursor-pointer text-red-500">
+                        <div
+                          onClick={() => deleteHandle(item._id)}
+                          className="p-2 pr-1 bg-gray-100 hover:bg-gray-200 rounded cursor-pointer text-red-500"
+                        >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="icon icon-tabler icon-tabler-trash"
@@ -119,7 +169,6 @@ const PrintBarCode = () => {
                     </tr>
                   );
                 })}
-               
               </tbody>
             </table>
           </div>
